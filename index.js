@@ -10,6 +10,7 @@ class Leader extends EventEmitter {
     this.options = {};
     this.options.ttl = Math.max(options.ttl || 0, 1000); // Lock time to live
     this.options.wait = Math.max(options.wait || 0, 100); // Time between tries to be elected
+    this.options.transactionLifetimeLimitSeconds = options.transactionLifetimeLimitSeconds || 60;
     this.key = 'leader-' + crypto.createHash('sha1').update(options.key || 'default').digest('hex');
 
     this.initDatabase().then(() => this.elect());
@@ -17,7 +18,10 @@ class Leader extends EventEmitter {
 
   initDatabase() {
     return this.db.command({ ping: 1 })
-      .then(() => this.db.executeDbAdminCommand({ setParameter: 1, ttlMonitorSleepSecs: 1 }))
+      .then(() => {
+        this.db.executeDbAdminCommand({ setParameter: 1, ttlMonitorSleepSecs: 1 });
+        this.db.executeDbAdminCommand({ setParameter: 1, transactionLifetimeLimitSeconds: this.options.transactionLifetimeLimitSeconds });
+      })
       .then(() => this.db.listCollections({ name: this.key }))
       .catch((err) => {
         if (err.message !== 'ns not found') throw err;

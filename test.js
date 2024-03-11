@@ -5,7 +5,7 @@ const assert = require('assert');
 const url = 'mongodb://localhost:27017';
 
 MongoClient.connect(url, { useNewUrlParser: true }, function (err, client) {
-  assert.strictEqual(null, err);
+  assert.strictEqual(undefined, err);
 
   const leader = new Leader(client.db('test'));
   setInterval(() => {

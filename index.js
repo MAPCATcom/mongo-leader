@@ -19,10 +19,10 @@ class Leader extends EventEmitter {
   initDatabase() {
     return this.db.command({ ping: 1 })
       .then(() => {
-        this.db.executeDbAdminCommand({ 
-          setParameter: 1, 
-          ttlMonitorSleepSecs: 1, 
-          transactionLifetimeLimitSeconds: this.options.transactionLifetimeLimitSeconds 
+        this.db.admin().command({
+          setParameter: 1,
+          ttlMonitorSleepSecs: 1,
+          transactionLifetimeLimitSeconds: this.options.transactionLifetimeLimitSeconds
         });
       })
       .then(() => this.db.listCollections({ name: this.key }))
